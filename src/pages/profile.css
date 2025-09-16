@@ -93,7 +93,6 @@
 .battery-fill { width: 8px; height: 4px; background: #000; border-radius: 2px; }
 .signal { width: 24px; height: 12px; background: #000; border-radius: 2px; }
 
-/* Bottom navigation */
 .bottom { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #e5e7eb; }
 .nav { display: flex; }
 .nav-btn { flex: 1; padding: 16px 8px; text-align: center; background: transparent; border: none; cursor: pointer; }
