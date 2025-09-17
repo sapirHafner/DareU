@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const payload = JSON.parse(localStorage.getItem("generatedQuestions") || "{}");
+  console.log(payload);
 
   return (
     <div style={{ padding: "2rem" }}>
