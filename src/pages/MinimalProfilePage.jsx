@@ -1,23 +1,45 @@
 // src/pages/MinimalProfilePage.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StatusBar from '../components/StatusBar';
 import Goals from '../components/Goals';
 import './profile.css';
 
-const MinimalProfilePage = () => {
-  const [userLevel] = useState(7);
-  const [userScore] = useState(2840);
-  const [streak] = useState(12);
+const META_KEY = "dareu_meta";
 
-  const getAnimalStage = (level) => {
-    if (level <= 3) return { animal: '🐣', stage: 'Starting Out' };
-    if (level <= 6) return { animal: '🐤', stage: 'Growing' };
-    if (level <= 10) return { animal: '🐦', stage: 'Progressing' };
-    if (level <= 15) return { animal: '🦅', stage: 'Soaring' };
+function readMeta() {
+  try {
+    const m = JSON.parse(localStorage.getItem(META_KEY) || "{}");
+    return {
+      points: Number(m.points ?? 0),
+      level: Number(m.level ?? 1),
+    };
+  } catch {
+    return { points: 0, level: 1 };
+  }
+}
+
+const MinimalProfilePage = () => {
+  const [{ points, level }, setMeta] = useState(() => readMeta());
+
+  useEffect(() => {
+    // טען נקודות/Level בעת כניסה
+    setMeta(readMeta());
+
+    // האזנה לעדכון חי שמגיע מעמוד Challenges (אחרי Success)
+    const handler = () => setMeta(readMeta());
+    window.addEventListener("dareu:progress-update", handler);
+    return () => window.removeEventListener("dareu:progress-update", handler);
+  }, []);
+
+  const getAnimalStage = (lvl) => {
+    if (lvl <= 2) return { animal: '🐣', stage: 'Starting Out' };
+    if (lvl <= 4) return { animal: '🐤', stage: 'Growing' };
+    if (lvl <= 6) return { animal: '🐦', stage: 'Progressing' };
+    if (lvl <= 10) return { animal: '🦅', stage: 'Soaring' };
     return { animal: '🦋', stage: 'Transformed' };
   };
 
-  const currentAnimal = getAnimalStage(userLevel);
+  const currentAnimal = getAnimalStage(level);
 
   return (
     <div className="page profile-page">
@@ -35,23 +57,20 @@ const MinimalProfilePage = () => {
       <div className="container mb-8">
         <div className="center mb-6">
           <div className="animal">{currentAnimal.animal}</div>
-          <h2 className="subtitle">Level {userLevel}</h2>
+          <h2 className="subtitle">Level {level}</h2>
           <p className="muted">{currentAnimal.stage}</p>
         </div>
 
+        {/* הוספנו כאן רק Total Points, הסרנו Day Streak */}
         <div className="row center gap-32 mb-8">
           <div className="stat">
-            <div className="stat-value">{streak}</div>
-            <div className="stat-label">Day Streak</div>
-          </div>
-          <div className="stat">
-            <div className="stat-value">{userScore}</div>
+            <div className="stat-value">{points}</div>
             <div className="stat-label">Total Points</div>
           </div>
         </div>
       </div>
 
-      {/* Goals – מחליף את הטאבים הישנים */}
+      {/* Goals – יציג עיגולים ירוקים על בסיס dareu_progress, ולא מתאפס אוטומטית */}
       <div className="container">
         <Goals />
       </div>

@@ -8,6 +8,28 @@ const SEED = {
   creativity: ["Sketch for 5 minutes", "Write 100 words"],
 };
 
+const META_KEY = "dareu_meta";
+const PROG_KEY = "dareu_progress";
+
+function readMeta() {
+  try {
+    const m = JSON.parse(localStorage.getItem(META_KEY) || "{}");
+    return {
+      points: Number(m.points ?? 0),
+      level: Number(m.level ?? 1),
+    };
+  } catch {
+    return { points: 0, level: 1 };
+  }
+}
+
+function writeMeta(points) {
+  const level = 1 + Math.floor(points / 100);
+  localStorage.setItem(META_KEY, JSON.stringify({ points, level }));
+  // עדכן את דף ה-Journey בלייב אם פתוח
+  window.dispatchEvent(new Event("dareu:progress-update"));
+}
+
 export default function Challenges() {
   return (
     <div className="ch-page">
@@ -35,7 +57,7 @@ function Section({ name, seed }) {
             key={it.id}
             id={it.id}
             title={it.title}
-            category={name.toLowerCase()}  // לצבירת התקדמות לפי קטגוריה
+            category={name.toLowerCase()}
             onRemove={remove}
           />
         ))}
@@ -53,13 +75,18 @@ function ChallengeRow({ id, title, category, onRemove }) {
       // Start -> Success (ירוק)
       setStatus("success");
     } else if (status === "success") {
-      // לחיצה על Success מוחקת את המשימה ומעדכנת מטרות
+      // Success -> מחיקה + עדכון נקודות/דרגה + עדכון מטרות
       try {
-        const key = "dareu_progress";
-        const data = JSON.parse(localStorage.getItem(key) || "{}");
+        // 1) עדכון נקודות/דרגה
+        const meta = readMeta();
+        const newPoints = meta.points + 10; // +10 לכל הצלחה
+        writeMeta(newPoints);
+
+        // 2) עדכון מטרות לפי קטגוריה (לשימור הויזואליזציה ב-Goals)
+        const data = JSON.parse(localStorage.getItem(PROG_KEY) || "{}");
         const curr = Number(data[category] || 0);
         data[category] = curr + 1;
-        localStorage.setItem(key, JSON.stringify(data));
+        localStorage.setItem(PROG_KEY, JSON.stringify(data));
       } catch {}
       onRemove(id);
     }
@@ -67,7 +94,7 @@ function ChallengeRow({ id, title, category, onRemove }) {
 
   const onLaterClick = () => {
     setStatus("later");
-    onRemove(id); // לא נחשב כהצלחה
+    onRemove(id); // לא מוסיף נקודות
   };
 
   return (

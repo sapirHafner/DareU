@@ -2,14 +2,13 @@
 import { useEffect, useState } from "react";
 import "./goals.css";
 
-// כמות עיגולים לכל תחום (ניתן לשנות)
 const GOAL_TARGETS = { social: 10, fitness: 10, creativity: 10 };
 const TITLES = { social: "Social", fitness: "Fitness", creativity: "Creativity" };
 
 export default function Goals() {
   const [progress, setProgress] = useState({ social: 0, fitness: 0, creativity: 0 });
 
-  useEffect(() => {
+  const load = () => {
     try {
       const data = JSON.parse(localStorage.getItem("dareu_progress") || "{}");
       setProgress({
@@ -17,7 +16,16 @@ export default function Goals() {
         fitness: Number(data.fitness || 0),
         creativity: Number(data.creativity || 0),
       });
-    } catch {}
+    } catch {
+      setProgress({ social: 0, fitness: 0, creativity: 0 });
+    }
+  };
+
+  useEffect(() => {
+    load();
+    const handler = () => load();
+    window.addEventListener("dareu:progress-update", handler);
+    return () => window.removeEventListener("dareu:progress-update", handler);
   }, []);
 
   return (
