@@ -36,3 +36,77 @@
     transform: rotate(360deg);
   }
 }
+
+.nav-btn {
+  text-decoration: none;
+  color: #777;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 13px;
+}
+
+.nav-btn .nav-label {
+  margin-top: 4px;
+}
+
+/* מצב פעיל */
+.nav-btn.active {
+  color: #000; /* טקסט שחור */
+}
+
+.nav-btn.active svg {
+  stroke: #000; /* אייקון שחור מלא */
+}
+
+.nav-btn.active .nav-icon {
+  background: #000;
+  border-radius: 50%;
+}
+
+.nav-btn.active .nav-underline {
+  height: 3px;
+  width: 24px;
+  border-radius: 999px;
+  background: #000;
+  margin-top: 2px;
+}
+
+
+/* ---- Bottom bar ---- */
+.bottom.fixed {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  z-index: 1000; /* חשוב: מעל התוכן כדי שהקליקים יעבדו */
+}
+
+.nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 64px;
+}
+
+.nav-btn {
+  text-decoration: none;   /* בלי קו תחתי */
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 13px;
+}
+
+.nav-btn .nav-label { margin-top: 4px; }
+
+.nav-btn.active .nav-label { font-weight: 700; }
+.nav-btn.active .nav-underline {
+  height: 3px; width: 28px; border-radius: 999px;
+  background: #000; margin-top: 3px;
+}
+
+/* כדי שהתוכן לא יסתתר מאחורי הסרגל */
+.page, .ch-page, .profile-page {
+  padding-bottom: 88px;
+}

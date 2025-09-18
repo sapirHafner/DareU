@@ -1,20 +1,13 @@
+// src/pages/MinimalProfilePage.jsx
 import React, { useState } from 'react';
-import { MessageCircle } from 'lucide-react';
 import StatusBar from '../components/StatusBar';
-import BottomNav from '../components/BottomNav';
-import ChallengesTab from './tabs/ChallengesTab';
-import InfoTab from './tabs/InfoTab';
-import ProgressTab from './tabs/ProgressTab';
+import Goals from '../components/Goals';
 import './profile.css';
 
 const MinimalProfilePage = () => {
-  const [userLevel, setUserLevel] = useState(7);
-  const [userScore, setUserScore] = useState(2840);
-  const [streak, setStreak] = useState(12);
-  const [activeTab, setActiveTab] = useState('challenges');
-
-  // 0–100%
-  const levelProgress = ((userScore % 500) / 500) * 100;
+  const [userLevel] = useState(7);
+  const [userScore] = useState(2840);
+  const [streak] = useState(12);
 
   const getAnimalStage = (level) => {
     if (level <= 3) return { animal: '🐣', stage: 'Starting Out' };
@@ -26,34 +19,8 @@ const MinimalProfilePage = () => {
 
   const currentAnimal = getAnimalStage(userLevel);
 
-  const renderTab = () => {
-    if (activeTab === 'challenges') {
-      return <ChallengesTab />;
-    }
-    if (activeTab === 'info') {
-      return (
-        <InfoTab
-          userScore={userScore}
-          streak={streak}
-          userLevel={userLevel}
-          stage={currentAnimal.stage}
-        />
-      );
-    }
-    if (activeTab === 'progress') {
-      return (
-        <ProgressTab
-          userLevel={userLevel}
-          levelProgress={levelProgress}
-          userScore={userScore}
-        />
-      );
-    }
-    return null;
-  };
-
   return (
-    <div className="page">
+    <div className="page profile-page">
       <StatusBar />
 
       {/* Header */}
@@ -84,36 +51,10 @@ const MinimalProfilePage = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="container mb-6">
-        <div className="tabs">
-          <button
-            className={`tab ${activeTab === 'challenges' ? 'active' : ''}`}
-            onClick={() => setActiveTab('challenges')}
-          >
-            Challenges
-          </button>
-          <button
-            className={`tab ${activeTab === 'info' ? 'active' : ''}`}
-            onClick={() => setActiveTab('info')}
-          >
-            Information
-          </button>
-          <button
-            className={`tab ${activeTab === 'progress' ? 'active' : ''}`}
-            onClick={() => setActiveTab('progress')}
-          >
-            Progress
-          </button>
-        </div>
-        <div className="divider" />
+      {/* Goals – מחליף את הטאבים הישנים */}
+      <div className="container">
+        <Goals />
       </div>
-
-      <div className="tab-content">
-        {renderTab()}
-      </div>
-
-      <BottomNav active="journey" />
     </div>
   );
 };
