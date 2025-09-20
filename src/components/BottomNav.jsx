@@ -1,18 +1,27 @@
 // src/components/BottomNav.jsx
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import "./BottomNav.css";
 
 export default function BottomNav() {
+  const location = useLocation();
+  
+  // הצג רק בדפים שציינת
+  const allowedPages = ["/home", "/profile", "/challenges"];
+  
+  if (!allowedPages.includes(location.pathname)) {
+    return null;
+  }
+
   return (
     <div className="bottom fixed">
       <div className="nav">
-        {/* Journey */}
+        {/* Journey - Profile */}
         <NavLink
           to="/profile"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
         >
-          <div className="nav-icon" style={{ fontSize: "28px" }}>🐦</div>
+          <div className="nav-icon">🐦</div>
           <span className="nav-label">Journey</span>
           <div className="nav-underline" />
         </NavLink>
@@ -22,18 +31,18 @@ export default function BottomNav() {
           to="/challenges"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
         >
-          <div className="nav-icon" style={{ fontSize: "28px" }}>🎯</div>
+          <div className="nav-icon">🎯</div>
           <span className="nav-label">Challenges</span>
           <div className="nav-underline" />
         </NavLink>
 
-        {/* Talk to me !! */}
+        {/* Talk to me */}
         <NavLink
-          to="/progress"  // אם תרצי נחליף ל-/talk
+          to="/progress"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
         >
-          <div className="nav-icon" style={{ fontSize: "28px" }}>💬</div>
-          <span className="nav-label">Talk to me !!</span>
+          <div className="nav-icon">💬</div>
+          <span className="nav-label">Talk to me</span>
           <div className="nav-underline" />
         </NavLink>
       </div>

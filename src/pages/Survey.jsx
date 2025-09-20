@@ -244,19 +244,19 @@ export default function Survey() {
         primaryMotivation: sortedCats[0],
       };
 
-      localStorage.setItem("surveyAnswers", JSON.stringify(surveyData));
-
+      window.surveyAnswers = surveyData;
+      
       const payload = await generateQuestionsMock({
         answers: surveyData,
         topics: selectedTopics,        // ✅ לא לעטוף בעוד מערך
         count: 8,
       });
 
-      localStorage.setItem("generatedQuestions", JSON.stringify(payload));
+      window.generatedQuestions = payload;
       setHasFinished(true);
 
       setTimeout(() => {
-        navigate("/profile");
+        navigate("/home");
       }, 3000);
     } catch (e) {
       console.error("Mock agent failed:", e);
