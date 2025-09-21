@@ -1,47 +1,95 @@
 import { Router } from 'express';
-import { getUserHistory, saveDecision } from '../tools/history.js';
 import { planChallenges } from '../agents/planner.js';
+import { getUserHistory, saveDecision } from '../tools/history.js';
+import { nextDifficulty } from '../tools/progression.js';
 
 const router = Router();
 
+// יצירת אתגרים על בסיס שאלון
 router.post('/plan', async (req, res) => {
   try {
-    const profile = req.body.profile || {};
-    if (!profile.userId) return res.status(400).json({ error: 'Missing userId' });
-    const challenges = await planChallenges(profile, profile.userId);
-    res.json({ challenges });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'planner_failed' });
-  }
-});
+    const { 
+      userId, 
+      surveyData,  // נתוני השאלון החדשים
+      userLevel = 1,
+      availability = { minutesPerSession: 15 }
+    } = req.body || {};
 
-router.post('/decision', async (req, res) => {
-  try {
-    const { userId, challenge, decision } = req.body;
-    if (!userId || !challenge || !decision) return res.status(400).json({ error: 'bad_request' });
+    if (!userId) {
+      return res.status(400).json({ error: 'userId required' });
+    }
 
-    saveDecision({
-      userId,
-      challengeId: challenge.id,
-      contentHash: challenge.contentHash,
-      status: decision,
-      mode: challenge.mode,
-      points: challenge.points || 0,
-      metadata: { topic: challenge.topic, difficulty: challenge.difficulty }
+    // המרת נתוני השאלון לפרופיל
+    const profile = surveyDataToProfile(surveyData, userLevel, availability);
+    
+    const challenges = await planChallenges(profile, userId);
+    
+    res.json({ 
+      challenges,
+      profile: {
+        topics: profile.topics,
+        primaryMotivation: profile.motivation,
+        currentLevel: userLevel
+      }
     });
-
-    res.json({ ok: true, nextAction: decision === 'declined' ? 'request_alternative' : 'none' });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'decision_failed' });
+  } catch (error) {
+    console.error('Error in /agent/plan:', error);
+    res.status(500).json({ error: 'internal_error', message: error.message });
   }
 });
 
-router.get('/history', (req, res) => {
-  const userId = req.query.userId;
-  if (!userId) return res.status(400).json({ error: 'missing_userId' });
-  res.json({ history: getUserHistory(userId) });
+// החלטה על אתגר (Success/Later/Skip)
+router.post('/decision', (req, res) => {
+  const { userId, challengeId, contentHash, status, mode, points, metadata } = req.body || {};
+  
+  if (!userId || !challengeId || !status) {
+    return res.status(400).json({ error: 'missing_required_fields' });
+  }
+
+  saveDecision({ userId, challengeId, contentHash, status, mode, points, metadata });
+  
+  res.json({ ok: true, recorded: status });
 });
+
+// היסטוריית משתמש
+router.get('/history/:userId', (req, res) => {
+  const { userId } = req.params;
+  const { limit = 50 } = req.query;
+  
+  const history = getUserHistory(userId, Number(limit));
+  res.json({ history, count: history.length });
+});
+
+// המרת נתוני שאלון לפרופיל סוכן
+function surveyDataToProfile(surveyData, userLevel, availability) {
+  if (!surveyData) {
+    // ברירת מחדל אם אין נתוני שאלון
+    return {
+      topics: ['Building Self-Confidence', 'Learning & Growth', 'Personal Goals'],
+      motivation: 'intrinsic',
+      availability,
+      userLevel,
+      motivationScores: {
+        intrinsic: 0.7,
+        social: 0.3,
+        competitive: 0.2,
+        extrinsic: 0.4
+      }
+    };
+  }
+
+  return {
+    topics: surveyData.selectedTopics || ['Building Self-Confidence'],
+    motivation: surveyData.primaryMotivation || 'intrinsic',
+    availability,
+    userLevel,
+    motivationScores: surveyData.normalized || {
+      intrinsic: 0.5,
+      social: 0.5,
+      competitive: 0.5,
+      extrinsic: 0.5
+    }
+  };
+}
 
 export default router;
