@@ -4,7 +4,16 @@ import "./challenges.css";
 
 const META_KEY = "dareu_meta";
 const PROG_KEY = "dareu_progress";
-const USER_ID = "user_" + Math.random().toString(36).substr(2, 9); // מזהה זמני
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5050";
+
+function getUserId() {
+  const KEY = "dareu_uid";
+  let id = localStorage.getItem(KEY);
+  if (!id) { id = "USER_" + Math.random().toString(36).slice(2, 10); localStorage.setItem(KEY, id); }
+  return id;
+}
+const USER_ID = getUserId();
 
 function readMeta() {
   try {
@@ -25,68 +34,113 @@ function writeMeta(points) {
 }
 
 export default function Challenges() {
-  const [challenges, setChallenges] = useState([]);
+  const [challenges, setChallenges] = useState({});           // { [topic]: Challenge[] }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);       // { topics, primaryMotivation, currentLevel }
+  const [allDoneToday, setAllDoneToday] = useState(false);    // ← הודעת "סיימת הכל להיום"
 
+  // טען פרופיל לתצוגה (כולל הנושאים)
   useEffect(() => {
-    loadChallengesFromAgent();
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/profile/get?userId=${USER_ID}`);
+        if (r.ok) {
+          const j = await r.json();
+          if (j?.ok) setUserProfile(j.profile);
+        }
+      } catch {}
+    })();
   }, []);
+
+  useEffect(() => { loadChallengesFromAgent(); }, []);
+
+  // עוזר: קבע רשימת נושאים להציג תמיד (בדיוק 3)
+  function resolveTopics(dataProposalsTopics = []) {
+    const surveyTopics = window.surveyAnswers?.selectedTopics || [];
+    const profileTopics = userProfile?.topics || [];
+    const planTopics = Array.from(new Set(dataProposalsTopics.filter(Boolean)));
+    
+    let topics = planTopics.length ? planTopics
+                 : profileTopics.length ? profileTopics
+                 : surveyTopics.length ? surveyTopics
+                 : ["Fitness & Sports", "Learning & Growth", "Communication Skills"]; // ברירת מחדל נעימה
+    
+    // וודא שיש בדיוק 3 נושאים
+    if (topics.length > 3) {
+      topics = topics.slice(0, 3);
+    } else if (topics.length < 3) {
+      const defaults = ["Personal Goals", "Building Self-Confidence", "Time Management"];
+      for (const defaultTopic of defaults) {
+        if (!topics.includes(defaultTopic) && topics.length < 3) {
+          topics.push(defaultTopic);
+        }
+      }
+    }
+    
+    return topics;
+  }
 
   const loadChallengesFromAgent = async () => {
     try {
       setLoading(true);
-      
-      // קבלת נתוני השאלון
+      setAllDoneToday(false);
+
       const surveyData = window.surveyAnswers;
       const userLevel = readMeta().level;
-      
-      if (!surveyData) {
-        setError("Please complete the survey first to get personalized challenges");
-        setLoading(false);
-        return;
-      }
 
-      // קריאה לסוכן
-      const response = await fetch('http://localhost:5050/agent/plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch(`${API_BASE}/agent/plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: USER_ID,
-          surveyData: surveyData,
-          userLevel: userLevel,
-          availability: {
-            minutesPerSession: 15
-          }
+          // מה שמעניין את ה־planner:
+          survey: { topics: surveyData?.selectedTopics || [] },
+          profile: {
+            topics: surveyData?.selectedTopics || [],
+            level: userLevel,
+            motivation: surveyData?.primaryMotivation
+          },
+          availability: { minutesPerSession: 15 }
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`Agent request failed: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Agent request failed: ${response.status}`);
       const data = await response.json();
-      
-      // ארגון האתגרים לפי נושאים
-      const challengesByTopic = {};
-      data.challenges.forEach(challenge => {
-        if (!challengesByTopic[challenge.topic]) {
-          challengesByTopic[challenge.topic] = [];
+
+      // נבנה אובייקט לפי נושאים כך שתמיד יוצגו כל הנושאים של המשתמש
+      const proposals = Array.isArray(data.proposals) ? data.proposals : [];
+      const topicsToShow = resolveTopics(proposals.map(p => p.topic));
+
+      const grouped = {};
+      topicsToShow.forEach(t => grouped[t] = []); // ← גם אם ריק, נשמר להצגה
+
+      proposals.forEach(p => {
+        const topic = p.topic || topicsToShow[0] || "general";
+        if (grouped[topic]) { // ← וודא שהנושא קיים
+          grouped[topic].push({
+            id: p.runId,
+            title: p.suggestedText || "dareU: Try a tiny step",
+            instructions: "",
+            difficulty: p.difficulty || "easy",
+            est_time_min: p.minutes || 5,
+            topic,
+            points: 10
+          });
         }
-        challengesByTopic[challenge.topic].push(challenge);
       });
 
-      setChallenges(challengesByTopic);
-      setUserProfile(data.profile);
+
+      setChallenges(grouped);
+      // שמור גם פרופיל שחזר מהתכנון (אם חזר)
+      if (data.profile) {
+        setUserProfile(prev => ({ ...(prev || {}), ...data.profile }));
+      }
       setError(null);
-      
+      setAllDoneToday(false); // ← תמיד יהיו משימות
     } catch (err) {
-      console.error('Error loading challenges from agent:', err);
+      console.error("Error loading challenges from agent:", err);
       setError(err.message);
-      
       // fallback לאתגרים סטטיים
       loadFallbackChallenges();
     } finally {
@@ -96,55 +150,60 @@ export default function Challenges() {
 
   const loadFallbackChallenges = () => {
     const surveyData = window.surveyAnswers;
-    const defaultTopics = ["Building Self-Confidence", "Learning & Growth", "Personal Goals"];
-    const topicsToUse = surveyData?.selectedTopics || defaultTopics;
+    const profileTopics = userProfile?.topics || [];
+    const defaultTopics = ["Fitness & Sports", "Learning & Growth", "Communication Skills"];
+    const topicsToUse = profileTopics.length ? profileTopics.slice(0, 3) : 
+                       surveyData?.selectedTopics?.slice(0, 3) || defaultTopics;
     
     const fallbackChallenges = {};
     topicsToUse.forEach(topic => {
       fallbackChallenges[topic] = [
         {
-          id: `${topic}-1`,
+          id: `${topic}-1-${Date.now()}`,
           title: `dareU: Take a small step in ${topic}`,
           instructions: "",
           difficulty: "easy",
           est_time_min: 10,
-          tags: ["fallback"],
+          topic,
           points: 15
         },
         {
-          id: `${topic}-2`, 
+          id: `${topic}-2-${Date.now()}`, 
           title: `dareU: Practice ${topic} for 5 minutes`,
           instructions: "",
           difficulty: "easy",
           est_time_min: 5,
-          tags: ["fallback"],
+          topic,
           points: 10
         }
       ];
     });
     
     setChallenges(fallbackChallenges);
+    setAllDoneToday(false); // ← וודא שלא נציג "Well done"
   };
 
   const recordChallengeDecision = async (challengeId, contentHash, status, points) => {
     try {
-      await fetch('http://localhost:5050/agent/decision', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: USER_ID,
-          challengeId,
-          contentHash,
-          status,
-          mode: 'solo',
-          points,
-          metadata: { timestamp: Date.now() }
-        })
-      });
+      if (status === "success") {
+        const resp = await fetch(`${API_BASE}/agent/complete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ runId: challengeId, evidence: { socialExposure: true } })
+        });
+        const data = await resp.json();
+        return data; // ← מחזירים ל-Row
+      } else if (status === "later") {
+        await fetch(`${API_BASE}/agent/decision`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ runId: challengeId, decision: "reject" })
+        });
+        return { ok: true };
+      }
     } catch (err) {
       console.warn('Failed to record decision to agent:', err);
+      return { ok: false, error: String(err) };
     }
   };
 
@@ -156,18 +215,20 @@ export default function Challenges() {
       
       // נסה כמה פעמים לקבל אתגר שונה
       for (let attempt = 0; attempt < 3; attempt++) {
-        const response = await fetch('http://localhost:5050/agent/plan', {
+        const response = await fetch(`${API_BASE}/agent/plan`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             userId: USER_ID,
-            surveyData: { ...surveyData, selectedTopics: [topic] },
-            userLevel: userLevel,
-            availability: {
-              minutesPerSession: 15
-            }
+            survey: { topics: [topic] },
+            profile: {
+              topics: [topic],
+              level: userLevel,
+              motivation: surveyData?.primaryMotivation
+            },
+            availability: { minutesPerSession: 15 }
           })
         });
 
@@ -178,15 +239,23 @@ export default function Challenges() {
         const data = await response.json();
         
         // מצא אתגר שלא קיים כבר
-        const newChallenge = data.challenges?.find(challenge => 
+        const newProposal = (data.proposals || []).find(p => 
           !existingChallenges.some(existing => 
-            existing.title === challenge.title || 
-            existing.contentHash === challenge.contentHash
+            existing.title === (p.suggestedText || "dareU: Try a tiny step") || 
+            existing.id === p.runId
           )
         );
         
-        if (newChallenge) {
-          return newChallenge;
+        if (newProposal) {
+          return {
+            id: newProposal.runId,
+            title: newProposal.suggestedText || "dareU: Try a tiny step",
+            instructions: "",
+            difficulty: newProposal.difficulty || "easy",
+            est_time_min: newProposal.minutes || 5,
+            topic: newProposal.topic || topic,
+            points: 10
+          };
         }
       }
       
@@ -263,112 +332,138 @@ export default function Challenges() {
   return (
     <div className="ch-page">
       <h1 className="ch-title">Your AI-Generated Challenges</h1>
-      {userProfile && (
-        <div style={{ 
-          textAlign: "center", 
-          marginBottom: "2rem",
+
+      {/* Header with user's topics & motivation */}
+      <div style={{
+        textAlign: "center",
+        marginBottom: "2rem",
+        padding: "1rem",
+        background: "#f8f9ff",
+        borderRadius: "8px",
+        border: "1px solid #e9ecef"
+      }}>
+        <p style={{ margin: "0.5rem 0", color: "#666" }}>
+          <strong>Focus Areas:</strong>{" "}
+          {(userProfile?.topics || window.surveyAnswers?.selectedTopics || []).join(", ")}
+        </p>
+        <p style={{ margin: "0.5rem 0", color: "#666" }}>
+          <strong>Motivation Style:</strong> {userProfile?.primaryMotivation || userProfile?.motivation || ""}
+        </p>
+        <p style={{ margin: "0.5rem 0", color: "#666" }}>
+          <strong>Your Level:</strong> {userProfile?.currentLevel ?? userProfile?.level ?? readMeta().level}
+        </p>
+      </div>
+
+      {/* If there are API errors and still have some cached challenges, show them below the banner */}
+      {error && (
+        <div style={{
+          textAlign: "center",
           padding: "1rem",
-          background: "#f8f9ff",
+          background: "#fff3cd",
+          border: "1px solid #ffeaa7",
           borderRadius: "8px",
-          border: "1px solid #e9ecef"
+          margin: "0 1rem 1.5rem"
         }}>
-          <p style={{ margin: "0.5rem 0", color: "#666" }}>
-            <strong>Focus Areas:</strong> {userProfile.topics?.join(", ")}
-          </p>
-          <p style={{ margin: "0.5rem 0", color: "#666" }}>
-            <strong>Motivation Style:</strong> {userProfile.primaryMotivation}
-          </p>
-          <p style={{ margin: "0.5rem 0", color: "#666" }}>
-            <strong>Your Level:</strong> {userProfile.currentLevel}
-          </p>
+          <p style={{ color: "#856404", margin: 0 }}>{error}</p>
         </div>
       )}
-      
-      {Object.keys(challenges).length === 0 ? (
+
+      {/* All done message */}
+      {allDoneToday ? (
         <div style={{ textAlign: "center", padding: "2rem" }}>
-          <p>No challenges available. Please try refreshing.</p>
-          <button onClick={loadChallengesFromAgent}>Refresh Challenges</button>
+          <h2 style={{ marginBottom: "0.5rem" }}>🎉 Well done!</h2>
+          <p style={{ color: "#555" }}>
+            You've completed all your challenges for today.
+            Check back tomorrow for fresh dares tailored to your goals.
+          </p>
         </div>
       ) : (
-        Object.entries(challenges).map(([topic, topicChallenges]) => (
-          <Section 
-            key={topic} 
-            name={topic} 
-            challenges={topicChallenges}
-            onChallengeComplete={recordChallengeDecision}
-            onGenerateNew={generateNewChallenge}
-          />
-        ))
+        <>
+          {/* Sections per topic — always rendered, even if empty */}
+          {Object.entries(challenges).map(([topic, topicChallenges]) => (
+            <Section
+              key={topic}
+              name={topic}
+              challenges={topicChallenges}
+              onChallengeComplete={recordChallengeDecision}
+              onGenerateNew={generateNewChallenge}
+            />
+          ))}
+
+          {/* Action row: לא מציגים אם סיימת הכל */}
+          <div style={{ textAlign: "center", marginTop: "2rem" }}>
+            <button
+              onClick={loadChallengesFromAgent}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "1rem"
+              }}
+            >
+              Generate New Challenges
+            </button>
+          </div>
+        </>
       )}
-      
-      <div style={{ textAlign: "center", marginTop: "2rem" }}>
-        <button 
-          onClick={loadChallengesFromAgent}
-          style={{
-            padding: "0.75rem 1.5rem",
-            background: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "1rem"
-          }}
-        >
-          Generate New Challenges
-        </button>
-      </div>
     </div>
   );
 }
 
 function Section({ name, challenges, onChallengeComplete, onGenerateNew }) {
   const [items, setItems] = useState(
-    () => challenges.map((challenge, i) => ({ 
+    () => (challenges || []).map((challenge, i) => ({
       ...challenge,
       id: challenge.id || `${name}-${i}`,
       localStatus: "idle"
     }))
   );
-
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const remove = (id) => setItems((prev) => prev.filter((it) => it.id !== id));
+  const remove = (id) => setItems(prev => prev.filter(it => it.id !== id));
 
   const addNewChallenge = async () => {
     if (isGenerating) return;
-    
     setIsGenerating(true);
     try {
-      // העבר את האתגרים הקיימים כדי למנוע כפילויות
       const newChallenge = await onGenerateNew(name, items);
       if (newChallenge) {
-        setItems(prev => [...prev, {
-          ...newChallenge,
-          localStatus: "idle"
-        }]);
+        setItems(prev => [...prev, { ...newChallenge, localStatus: "idle" }]);
       }
     } catch (err) {
-      console.error('Failed to generate new challenge:', err);
+      console.error("Failed to generate new challenge:", err);
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const showEmpty = !items || items.length === 0;
+
   return (
     <section className="ch-section">
       <h2 className="ch-section__header">{name}</h2>
-      <ul className="ch-list">
-        {items.map((challenge) => (
-          <ChallengeRow
-            key={challenge.id}
-            challenge={challenge}
-            onRemove={remove}
-            onComplete={onChallengeComplete}
-            onGenerateNew={addNewChallenge}
-            isGenerating={isGenerating}
-          />
-        ))}
-      </ul>
+
+      {showEmpty ? (
+        <p style={{ color: "#888", textAlign: "center", margin: "0.5rem 0 1rem" }}>
+          No open challenges for this topic today.
+        </p>
+      ) : (
+        <ul className="ch-list">
+          {items.map(challenge => (
+            <ChallengeRow
+              key={challenge.id}
+              challenge={challenge}
+              onRemove={remove}
+              onComplete={onChallengeComplete}
+              onGenerateNew={addNewChallenge}
+              isGenerating={isGenerating}
+            />
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -381,35 +476,26 @@ function ChallengeRow({ challenge, onRemove, onComplete, onGenerateNew, isGenera
       setStatus("success");
     } else if (status === "success") {
       try {
-        // עדכון נקודות מקומי
-        const meta = readMeta();
-        const newPoints = meta.points + (challenge.points || 10);
-        writeMeta(newPoints);
-
-        // עדכון מטרות
+        // יעדכן מטרות/ספירות מקומיות
         const data = JSON.parse(localStorage.getItem(PROG_KEY) || "{}");
-        const category = challenge.topic?.toLowerCase().replace(/[^a-z]/g, '') || 'general';
+        const category = challenge.topic?.toLowerCase().replace(/[^a-z]/g, "") || "general";
         const curr = Number(data[category] || 0);
         data[category] = curr + 1;
         localStorage.setItem(PROG_KEY, JSON.stringify(data));
-        
         window.dispatchEvent(new Event("dareu:progress-update"));
 
-        // שליחה לסוכן
-        await onComplete(
-          challenge.id, 
-          challenge.contentHash, 
-          'success', 
-          challenge.points || 10
-        );
+        // שליחת השלמה לשרת
+        const res = await onComplete(challenge.id, challenge.contentHash, "success", challenge.points || 10);
 
-      } catch (error) {
-        console.error("Error updating progress:", error);
+        // נקודות לפי השרת (או fallback)
+        const gained = (res && typeof res.points === "number") ? res.points : (challenge.points || 10);
+        const meta = readMeta();
+        writeMeta(meta.points + gained);
+      } catch (e) {
+        console.error("Error updating progress:", e);
       }
-      
+
       onRemove(challenge.id);
-      // יצירת אתגר חדש אחרי השלמה - העבר את הנושא ואת האתגרים הקיימים
-      setTimeout(() => onGenerateNew(challenge.topic, [challenge]), 500);
     }
   };
 

@@ -2,6 +2,20 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Survey.css";
 
+// ✅ הגדרת BASE API להעביר בין סביבות
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5050";
+
+function getUserId() {
+  const KEY = "dareu_uid";
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = "USER_" + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+const USER_ID = getUserId();
+
 /** ✅ Mock agent*/
 async function generateQuestionsMock({ answers, topics = [], count = 8 }) {
   const firstTopic = topics[0] || "your goal";
@@ -244,8 +258,10 @@ export default function Survey() {
         primaryMotivation: sortedCats[0],
       };
 
+      // שמירה ב-window לצרכים מקומיים
       window.surveyAnswers = surveyData;
       
+      // יצירת שאלות מדמות
       const payload = await generateQuestionsMock({
         answers: surveyData,
         topics: selectedTopics,        // ✅ לא לעטוף בעוד מערך
@@ -253,13 +269,30 @@ export default function Survey() {
       });
 
       window.generatedQuestions = payload;
+
+      // ✅ קריאה לשרת לשמירת הפרופיל
+      await fetch(`${API_BASE}/profile/upsert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: USER_ID,
+          topics: selectedTopics,                      // שמות אחידים בשירות
+          motivation: surveyData.primaryMotivation,    // primaryMotivation -> motivation
+          level: "beginner",                           // או להחליט לפי normalized/scores
+          answers,
+          scores,
+          normalized,
+          availability: null
+        })
+      });
+
       setHasFinished(true);
 
       setTimeout(() => {
         navigate("/home");
       }, 3000);
     } catch (e) {
-      console.error("Mock agent failed:", e);
+      console.error("Error finishing survey:", e);
       setSubmitting(false);
     }
   }

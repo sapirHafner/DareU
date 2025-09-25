@@ -7,7 +7,9 @@
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "dotenv": "^17.2.2",
     "lucide-react": "^0.544.0",
+    "mongodb": "^6.20.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.1",
@@ -20,7 +22,6 @@
     "server": "cd server && npm run dev",
     "dev": "concurrently \"npm run client\" \"npm run server\""
   },
-
   "eslintConfig": {
     "extends": [
       "react-app",
