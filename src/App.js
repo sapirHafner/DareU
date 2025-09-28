@@ -1,12 +1,13 @@
 // src/App.js
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
+import ChatPage from "./ChatPage.jsx"; // ← שימי לב לנתיב
+import BottomNav from "./components/BottomNav"; // ← שימי לב לנתיב
+import Challenges from "./pages/Challenges";
 import HomePage from "./pages/HomePage.jsx";
+import MinimalProfilePage from "./pages/MinimalProfilePage";
 import Survey from "./pages/Survey";
 import Topics from "./pages/Topics";
-import MinimalProfilePage from "./pages/MinimalProfilePage";
-import Challenges from "./pages/Challenges";
-import BottomNav from "./components/BottomNav"; // ← שימי לב לנתיב
 
 // אם אין לך עמוד Progress, אפשר להשאיר את ה-stub למטה
 function ProgressStub() {
@@ -28,6 +29,8 @@ export default function App() {
           <Route path="/progress" element={<ProgressStub />} />
           <Route path="/survey" element={<Survey />} />
           <Route path="/topics" element={<Topics />} />
+           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Routes>
 
         {/* סרגל תחתון גלובלי – מופיע בכל הדפים */}
