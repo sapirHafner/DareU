@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import backgroundImage from './chat-bot-background.png';
+import React from "react";
 
 // Retrieve the token from environment variables
-const HF_TOKEN = process.env.REACT_APP_HF_TOKEN; 
+const HF_TOKEN = import.meta.env.VITE_HF_TOKEN; 
 const MODEL_NAME = "unsloth/Meta-Llama-3.1-8B-Instruct:featherless-ai";
 
 // Simple Typing Indicator Component

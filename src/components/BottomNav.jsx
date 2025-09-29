@@ -1,6 +1,7 @@
 // src/components/BottomNav.jsx
 import { NavLink } from "react-router-dom";
 import "./BottomNav.css";
+import React from "react";
 
 export default function BottomNav() {
   return (

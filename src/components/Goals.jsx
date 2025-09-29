@@ -1,6 +1,7 @@
 // src/components/Goals.jsx
 import { useEffect, useState } from "react";
 import "./goals.css";
+import React from "react";
 
 const GOAL_TARGETS = { social: 10, fitness: 10, creativity: 10 };
 const TITLES = { social: "Social", fitness: "Fitness", creativity: "Creativity" };

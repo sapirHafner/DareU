@@ -1,6 +1,7 @@
 // src/pages/Challenges.jsx
 import { useState } from "react";
 import "./challenges.css";
+import React from "react";
 
 const SEED = {
   social: ["Say hello to a stranger", "Call a friend you miss"],
