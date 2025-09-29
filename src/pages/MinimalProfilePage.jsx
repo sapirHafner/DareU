@@ -1,59 +1,48 @@
-import React, { useState } from 'react';
-import { MessageCircle } from 'lucide-react';
+// src/pages/MinimalProfilePage.jsx
+import React, { useEffect, useState } from 'react';
 import StatusBar from '../components/StatusBar';
-import BottomNav from '../components/BottomNav';
-import ChallengesTab from './tabs/ChallengesTab';
-import InfoTab from './tabs/InfoTab';
-import ProgressTab from './tabs/ProgressTab';
+import Goals from '../components/Goals';
 import './profile.css';
 
+const META_KEY = "dareu_meta";
+
+function readMeta() {
+  try {
+    const m = JSON.parse(localStorage.getItem(META_KEY) || "{}");
+    return {
+      points: Number(m.points ?? 0),
+      level: Number(m.level ?? 1),
+    };
+  } catch {
+    return { points: 0, level: 1 };
+  }
+}
+
 const MinimalProfilePage = () => {
-  const [userLevel, setUserLevel] = useState(7);
-  const [userScore, setUserScore] = useState(2840);
-  const [streak, setStreak] = useState(12);
-  const [activeTab, setActiveTab] = useState('challenges');
+  const [{ points, level }, setMeta] = useState(() => readMeta());
 
-  // 0–100%
-  const levelProgress = ((userScore % 500) / 500) * 100;
+  useEffect(() => {
+    // טען נקודות/Level בעת כניסה
+    setMeta(readMeta());
 
-  const getAnimalStage = (level) => {
-    if (level <= 3) return { animal: '🐣', stage: 'Starting Out' };
-    if (level <= 6) return { animal: '🐤', stage: 'Growing' };
-    if (level <= 10) return { animal: '🐦', stage: 'Progressing' };
-    if (level <= 15) return { animal: '🦅', stage: 'Soaring' };
+    // האזנה לעדכון חי שמגיע מעמוד Challenges (אחרי Success)
+    const handler = () => setMeta(readMeta());
+    window.addEventListener("dareu:progress-update", handler);
+    return () => window.removeEventListener("dareu:progress-update", handler);
+  }, []);
+
+  const getAnimalStage = (lvl) => {
+    if (lvl <= 2) return { animal: '🐣', stage: 'Starting Out' };
+    if (lvl <= 4) return { animal: '🐤', stage: 'Growing' };
+    if (lvl <= 6) return { animal: '🐦', stage: 'Progressing' };
+    if (lvl <= 10) return { animal: '🦅', stage: 'Soaring' };
     return { animal: '🦋', stage: 'Transformed' };
   };
 
-  const currentAnimal = getAnimalStage(userLevel);
-
-  const renderTab = () => {
-    if (activeTab === 'challenges') {
-      return <ChallengesTab />;
-    }
-    if (activeTab === 'info') {
-      return (
-        <InfoTab
-          userScore={userScore}
-          streak={streak}
-          userLevel={userLevel}
-          stage={currentAnimal.stage}
-        />
-      );
-    }
-    if (activeTab === 'progress') {
-      return (
-        <ProgressTab
-          userLevel={userLevel}
-          levelProgress={levelProgress}
-          userScore={userScore}
-        />
-      );
-    }
-    return null;
-  };
+  const currentAnimal = getAnimalStage(level);
 
   return (
-    <div className="page">
+    <div className="page profile-page">
       <StatusBar />
 
       {/* Header */}
@@ -68,52 +57,23 @@ const MinimalProfilePage = () => {
       <div className="container mb-8">
         <div className="center mb-6">
           <div className="animal">{currentAnimal.animal}</div>
-          <h2 className="subtitle">Level {userLevel}</h2>
+          <h2 className="subtitle">Level {level}</h2>
           <p className="muted">{currentAnimal.stage}</p>
         </div>
 
+        {/* הוספנו כאן רק Total Points, הסרנו Day Streak */}
         <div className="row center gap-32 mb-8">
           <div className="stat">
-            <div className="stat-value">{streak}</div>
-            <div className="stat-label">Day Streak</div>
-          </div>
-          <div className="stat">
-            <div className="stat-value">{userScore}</div>
+            <div className="stat-value">{points}</div>
             <div className="stat-label">Total Points</div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="container mb-6">
-        <div className="tabs">
-          <button
-            className={`tab ${activeTab === 'challenges' ? 'active' : ''}`}
-            onClick={() => setActiveTab('challenges')}
-          >
-            Challenges
-          </button>
-          <button
-            className={`tab ${activeTab === 'info' ? 'active' : ''}`}
-            onClick={() => setActiveTab('info')}
-          >
-            Information
-          </button>
-          <button
-            className={`tab ${activeTab === 'progress' ? 'active' : ''}`}
-            onClick={() => setActiveTab('progress')}
-          >
-            Progress
-          </button>
-        </div>
-        <div className="divider" />
+      {/* Goals – יציג עיגולים ירוקים על בסיס dareu_progress, ולא מתאפס אוטומטית */}
+      <div className="container">
+        <Goals />
       </div>
-
-      <div className="tab-content">
-        {renderTab()}
-      </div>
-
-      <BottomNav active="journey" />
     </div>
   );
 };

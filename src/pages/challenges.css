@@ -1,0 +1,36 @@
+/* Page */
+.ch-page { padding: 24px 16px 88px; } /* מרווח תחתון לסרגל */
+.ch-title { font-size: 28px; font-weight: 800; color: #ff9b85; margin: 8px 0 24px; }
+
+/* Sections */
+.ch-section { margin-bottom: 24px; }
+.ch-section__header { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+
+/* List */
+.ch-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+
+/* Row */
+.ch-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between; /* טקסט משמאל, כפתורים מימין */
+  align-items: center;
+}
+.ch-card__title { font-weight: 600; font-size: 15px; }
+.ch-actions { display: flex; gap: 8px; }
+
+/* Buttons */
+.ch-btn {
+  border: none; border-radius: 10px; padding: 8px 14px;
+  font-weight: 700; cursor: pointer; min-width: 90px; text-align: center; color: #fff;
+}
+
+/* צבעים */
+.ch-btn--main.ch-idle, .ch-btn--main.ch-later { background: #ff9b40; } /* Start – כתום */
+.ch-btn--main.ch-success { background: #2ecc71; }                     /* Success – ירוק */
+.ch-btn--later { background: #e74c3c; }                                /* Later – אדום */
+
+.ch-check { font-weight: 900; margin-right: 6px; }

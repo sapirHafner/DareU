@@ -1,0 +1,71 @@
+/* ====== מיקום וסגנון סרגל ====== */
+.bottom.fixed {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  z-index: 1000;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 64px;
+}
+
+/* ====== לינקים/כפתורים ====== */
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 13px;
+
+  /* מבטל קו תחתי וצבעי לינק */
+  text-decoration: none !important;
+  color: inherit !important;
+}
+.nav-btn:link,
+.nav-btn:visited,
+.nav-btn:hover,
+.nav-btn:active {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.nav-btn .nav-label {
+  margin-top: 4px;
+  font-weight: 400;
+  color: #444;
+}
+
+/* ====== פס מתחת ללשונית ====== */
+/* ברירת מחדל: אין פס בכלל */
+.nav-btn .nav-underline {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  border-radius: 999px;
+}
+
+/* רק לפריט האקטיבי: פס ורוד קטן */
+.nav-btn.active .nav-underline {
+  display: block !important;
+  width: 28px !important;
+  height: 3px !important;
+  margin-top: 4px;
+  background: #ff69b4 !important; /* ורוד */
+  border-radius: 999px;
+}
+
+/* אפשר להדגיש את הטקסט של האקטיבי אם תרצי */
+.nav-btn.active .nav-label {
+  font-weight: 700;
+  color: #111;
+}
+
+/* למנוע שכבת תוכן שמכסה את הסרגל */
+.page, .ch-page, .profile-page {
+  padding-bottom: 88px;
+}

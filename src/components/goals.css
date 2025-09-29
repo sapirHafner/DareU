@@ -1,0 +1,25 @@
+.goals { margin-top: 24px; }
+.goals__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ff9b85; /* תואם לטייטל הראשי */
+  margin: 0 0 16px;
+}
+
+.goal-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f2f2f2;
+}
+.goal-row__label { font-weight: 700; }
+.goal-row__counter { text-align: right; color: #666; font-weight: 600; }
+
+.circles { display: flex; gap: 6px; flex-wrap: wrap; }
+.circle {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #e8e8e8; background: #fff;
+}
+.circle--filled { background: #2ecc71; border-color: #2ecc71; }
