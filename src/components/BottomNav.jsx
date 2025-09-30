@@ -1,6 +1,7 @@
 // src/components/BottomNav.jsx
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "./BottomNav.css";
 
 export default function BottomNav() {
@@ -17,6 +18,7 @@ export default function BottomNav() {
     <div className="bottom fixed">
       <div className="nav">
         {/* Journey - Profile */}
+        
         <NavLink
           to="/profile"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
@@ -26,7 +28,7 @@ export default function BottomNav() {
           <div className="nav-underline" />
         </NavLink>
 
-        {/* Challenges */}
+        
         <NavLink
           to="/challenges"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
@@ -38,7 +40,7 @@ export default function BottomNav() {
 
         {/* Talk to me */}
         <NavLink
-          to="/progress"
+          to="/chat"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
         >
           <div className="nav-icon">💬</div>
