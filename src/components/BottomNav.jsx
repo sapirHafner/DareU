@@ -1,26 +1,36 @@
 // src/components/BottomNav.jsx
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { NavLink } from "react-router-dom";
 import "./BottomNav.css";
 
 export default function BottomNav() {
   const location = useLocation();
-  
-  // הצג רק בדפים שציינת
-  const allowedPages = ["/home", "/profile", "/challenges"];
-  
+
+  // מציגים את הניווט רק בעמודים הרלוונטיים
+  const allowedPages = ["/home", "/profile", "/minimalprofile", "/challenges", "/chat"];
   if (!allowedPages.includes(location.pathname)) {
     return null;
   }
 
   return (
-    <div className="bottom fixed">
+    // open קבוע – אין מצב סגור ואין כפתור חץ
+    <div className="bottom fixed open">
       <div className="nav">
-        {/* Journey - Profile */}
-        
+        {/* Home */}
         <NavLink
-          to="/profile"
+          to="/home"
+          className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
+        >
+          <div className="nav-icon">🏠</div>
+          <span className="nav-label">Home</span>
+          <div className="nav-underline" />
+        </NavLink>
+
+        {/* Journey (MinimalProfile) 
+            אם הראוט שלך הוא /profile שמוביל ל-MinimalProfilePage (כמו שהראית),
+            השאירי /profile. אם שינית לנתיב /minimalprofile — החליפי את ה-to למטה. */}
+        <NavLink
+          to="/profile" // אם שינית את הראוט ל־/minimalprofile, החליפי כאן ל־"/minimalprofile"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
         >
           <div className="nav-icon">🐦</div>
@@ -28,7 +38,7 @@ export default function BottomNav() {
           <div className="nav-underline" />
         </NavLink>
 
-        
+        {/* Challenges */}
         <NavLink
           to="/challenges"
           className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}

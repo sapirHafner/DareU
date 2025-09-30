@@ -25,13 +25,12 @@ const LifeCalendarSection = () => {
     
     const monthsPassed = (currentAge * 12) + (currentMonth - birthMonth);
     
-    // תוחלת חיים לפי מין - ממוצע עולמי
     const getLifeExpectancy = (genderValue) => {
       switch(genderValue) {
         case 'female': return 80;
         case 'male': return 76;
-        case 'other': return 78; // ממוצע בין השניים
-        case 'prefer_not_to_say': return 78; // ממוצע בין השניים
+        case 'other': return 78;
+        case 'prefer_not_to_say': return 78;
         default: return 78;
       }
     };
@@ -94,15 +93,14 @@ const LifeCalendarSection = () => {
   };
 
   const getMonthColor = (month) => {
-    if (month.isCurrent) return '#ff6b6b'; // אדום לחודש הנוכחי
-    if (month.isPassed) return '#4ecdc4'; // טירקיז לחודשים שעברו
-    return '#e0e0e0'; // אפור בהיר לעתיד
+    if (month.isCurrent) return '#ff6b6b';
+    if (month.isPassed) return '#4ecdc4';
+    return '#e0e0e0';
   };
 
-  // יצירת עמודות שנים - כל עמודה היא שנה
   const createYearColumns = () => {
     const yearColumns = [];
-    const yearsToShow = data.lifeExpectancy; // נציג לפי תוחלת החיים
+    const yearsToShow = data.lifeExpectancy;
     
     for (let yearIndex = 0; yearIndex < yearsToShow; yearIndex++) {
       const yearMonths = [];
@@ -111,13 +109,12 @@ const LifeCalendarSection = () => {
         yearMonths.push(monthData);
       }
       
-      // חלוקה ל-3 שורות של 4 חודשים כל אחת
       const yearColumn = {
         yearNumber: yearIndex,
         rows: [
-          yearMonths.slice(0, 4),   // שורה 1: חודשים 1-4
-          yearMonths.slice(4, 8),   // שורה 2: חודשים 5-8  
-          yearMonths.slice(8, 12)   // שורה 3: חודשים 9-12
+          yearMonths.slice(0, 4),
+          yearMonths.slice(4, 8),
+          yearMonths.slice(8, 12)
         ]
       };
       yearColumns.push(yearColumn);
@@ -227,7 +224,6 @@ const LifeCalendarSection = () => {
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      {/* Survey data - shows initially then can be hidden */}
       {showSurveyData && window.surveyAnswers && (
         <div style={{ 
           marginBottom: "1.5rem", 
@@ -272,7 +268,6 @@ const LifeCalendarSection = () => {
         </div>
       )}
 
-      {/* Motivational message */}
       <div style={{ 
         padding: "1.5rem", 
         background: "#ff9966", 
@@ -292,7 +287,6 @@ const LifeCalendarSection = () => {
           {getMotivationalMessage()}
         </p>
         
-        {/* Extended summary */}
         <div style={{ 
           display: "grid", 
           gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
@@ -322,7 +316,6 @@ const LifeCalendarSection = () => {
           </div>
         </div>
         
-        {/* Change date and gender */}
         <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
           <div>
             <label style={{ fontSize: "0.9rem", marginRight: "0.5rem" }}>Birth date:</label>
@@ -363,7 +356,6 @@ const LifeCalendarSection = () => {
         </div>
       </div>
 
-      {/* הלוח החדש - עמודות צפופות */}
       <div style={{ 
         background: "#ffcc99", 
         padding: "1.5rem", 
@@ -379,7 +371,6 @@ const LifeCalendarSection = () => {
           Each circle = one month | Each column = one year
         </h4>
         
-        {/* Legend */}
         <div style={{ 
           display: "flex", 
           justifyContent: "center", 
@@ -401,7 +392,6 @@ const LifeCalendarSection = () => {
           </div>
         </div>
 
-        {/* הלוח הצפוף - עמודות של שנים */}
         <div style={{ 
           display: "flex", 
           flexWrap: "wrap", 
@@ -416,7 +406,6 @@ const LifeCalendarSection = () => {
               alignItems: "center",
               gap: "2px"
             }}>
-              {/* מספר השנה */}
               <div style={{
                 fontSize: "0.6rem",
                 color: "#8B4513",
@@ -427,7 +416,6 @@ const LifeCalendarSection = () => {
                 {yearColumn.yearNumber}
               </div>
               
-              {/* 3 שורות של 4 עיגולים כל אחת */}
               {yearColumn.rows.map((row, rowIndex) => (
                 <div key={rowIndex} style={{ 
                   display: "flex", 
@@ -476,7 +464,6 @@ const LifeCalendarSection = () => {
           ))}
         </div>
         
-        {/* Note */}
         <div style={{ 
           textAlign: "center", 
           marginTop: "1rem", 
@@ -510,7 +497,6 @@ export default function HomePage() {
     }}>
       <h1 style={{ color: "#8B4513" }}>Welcome</h1>
       
-      {/* Survey data - compact version */}
       {surveyData && showSurveyData && (
         <div style={{ 
           marginBottom: "2rem", 
@@ -550,21 +536,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      <button
-        onClick={() => console.log("Navigate to profile")}
-        style={{
-          padding: "0.75rem 1.5rem",
-          borderRadius: "8px",
-          border: "none",
-          background: "#8B4513",
-          color: "#fff",
-          cursor: "pointer",
-          marginBottom: "1rem"
-        }}
-      >
-        Go to Profile
-      </button>
 
       <LifeCalendarSection />
     </div>
