@@ -1,7 +1,6 @@
 // src/pages/Challenges.jsx
 import React, { useState, useEffect } from "react";
 import "./challenges.css";
-import React from "react";
 
 const META_KEY = "dareu_meta";
 const PROG_KEY = "dareu_progress";

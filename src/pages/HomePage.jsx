@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
-import React from "react";
-=======
 import React, { useState, useMemo } from "react";
->>>>>>> feature/all-features-no-auth
 
 const LifeCalendarSection = () => {
   const [birthDate, setBirthDate] = useState(() => {

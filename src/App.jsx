@@ -1,27 +1,18 @@
 // src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import "./App.css"; 
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import "./App.css";
 
-import ChatPage from "./ChatPage.jsx";
-import BottomNav from "./components/BottomNav";
-import Challenges from "./pages/Challenges.jsx";
+import BottomNav from "./components/BottomNav.jsx";
+
 import HomePage from "./pages/HomePage.jsx";
 import MinimalProfilePage from "./pages/MinimalProfilePage.jsx";
 import Survey from "./pages/Survey.jsx";
 import Topics from "./pages/Topics.jsx";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
-
-import WelcomePage from "./pages/WelcomePage";   // 👈 חדש
-import Login from "./pages/Login";               // 👈 חדש
-
+import Challenges from "./pages/Challenges.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
-import BottomNav from "./components/BottomNav";
-import Challenges from "./pages/Challenges";
-import HomePage from "./pages/HomePage.jsx";
-import MinimalProfilePage from "./pages/MinimalProfilePage";
-import Survey from "./pages/Survey";
-import Topics from "./pages/Topics";
+import WelcomePage from "./pages/WelcomePage.jsx";
+import Login from "./pages/Login.jsx";
 
 function ProgressStub() {
   return <div style={{ padding: 24 }}>Progress page</div>;
@@ -31,7 +22,7 @@ function ProgressStub() {
 function Layout({ children }) {
   const location = useLocation();
   // הסתרה במסכים הראשוניים (לנדינג/לוגין/סקר)
-  const hideNavOn = ["/", "/login", "/survey"];   // 👈 עודכן
+  const hideNavOn = ["/", "/login", "/survey"];
 
   return (
     <div className="app">
@@ -44,42 +35,19 @@ function Layout({ children }) {
 export default function App() {
   return (
     <Router>
-      <div className="app">
-        <Routes>
-          {/* ברירת מחדל → פרופיל */}
-          <Route path="/" element={<Navigate to="/profile" replace />} />
-
-          {/* דפים */}
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/profile" element={<MinimalProfilePage />} />
-          <Route path="/survey" element={<Survey />} />
-          <Route path="/topics" element={<Topics />} />
-          <Route path="/challenges" element={<Challenges />} />
-          <Route path="/progress" element={<ProgressStub />} />
-          <Route path="/chat" element={<ChatPage />} />
-
-          {/* נפילה לנתיב קיים */}
-          <Route path="*" element={<Navigate to="/profile" replace />} />
-        </Routes>
-
-        {/* סרגל תחתון גלובלי */}
-        <BottomNav />
-      </div>
       <Layout>
         <Routes>
-          {/* דף ראשון של האפליקציה */}
-          <Route path="/" element={<WelcomePage />} />     {/* 👈 חדש */}
+          {/* דף פתיחה והתחברות */}
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/login" element={<Login />} />
 
-          {/* התחברות */}
-          <Route path="/login" element={<Login />} />      {/* 👈 חדש */}
-
-          {/* שאלון ואחריו שאר הדפים */}
-          <Route path="/survey" element={<Survey />} />
+          {/* שאר הדפים */}
           <Route path="/home" element={<HomePage />} />
           <Route path="/profile" element={<MinimalProfilePage />} />
+          <Route path="/survey" element={<Survey />} />
+          <Route path="/topics" element={<Topics />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/progress" element={<ProgressStub />} />
-          <Route path="/topics" element={<Topics />} />
           <Route path="/chat" element={<ChatPage />} />
 
           {/* נתיב לא קיים → חזרה לדף הפתיחה */}

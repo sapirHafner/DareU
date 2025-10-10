@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./goals.css";
-import React from "react";
 
 export default function Goals() {
   const [progress, setProgress] = useState({});

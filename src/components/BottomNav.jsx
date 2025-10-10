@@ -2,7 +2,6 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import "./BottomNav.css";
-import React from "react";
 
 export default function BottomNav() {
   const location = useLocation();
