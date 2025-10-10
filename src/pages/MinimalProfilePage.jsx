@@ -1,6 +1,6 @@
 // src/pages/MinimalProfilePage.jsx
 import React, { useEffect, useState } from 'react';
-import StatusBar from '../components/StatusBar';
+import { useNavigate } from 'react-router-dom';
 import Goals from '../components/Goals';
 import './profile.css';
 
@@ -19,7 +19,16 @@ function readMeta() {
 }
 
 const MinimalProfilePage = () => {
+  const navigate = useNavigate();
   const [{ points, level }, setMeta] = useState(() => readMeta());
+
+  // בדיקה אם השאלון הושלם
+  useEffect(() => {
+    if (!window.surveyAnswers) {
+      navigate('/survey');
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
     // טען נקודות/Level בעת כניסה
@@ -41,16 +50,16 @@ const MinimalProfilePage = () => {
 
   const currentAnimal = getAnimalStage(level);
 
+  // אם אין נתוני סקר, אל תרנדר כלום (הניווט כבר יקרה)
+  if (!window.surveyAnswers) {
+    return null;
+  }
+
   return (
     <div className="page profile-page">
-      <StatusBar />
-
-      {/* Header */}
+      {/* Header - רק Your Journey */}
       <div className="container pt-8 pb-6">
-        <div className="row between align-start mb-8">
-          <h1 className="title">Your Journey</h1>
-          <div className="pill pill-gray">חיצוני</div>
-        </div>
+        <h1 className="title">Your Journey</h1>
       </div>
 
       {/* Animal + Level */}
@@ -61,7 +70,7 @@ const MinimalProfilePage = () => {
           <p className="muted">{currentAnimal.stage}</p>
         </div>
 
-        {/* הוספנו כאן רק Total Points, הסרנו Day Streak */}
+        {/* Total Points */}
         <div className="row center gap-32 mb-8">
           <div className="stat">
             <div className="stat-value">{points}</div>
@@ -70,7 +79,7 @@ const MinimalProfilePage = () => {
         </div>
       </div>
 
-      {/* Goals – יציג עיגולים ירוקים על בסיס dareu_progress, ולא מתאפס אוטומטית */}
+      {/* Goals */}
       <div className="container">
         <Goals />
       </div>
