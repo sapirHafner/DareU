@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import React, { useState, useMemo } from "react";
+import React from 'react';
+import { useMemo, useState } from "react";
 
 const LifeCalendarSection = () => {
   const [birthDate, setBirthDate] = useState(() => {

@@ -1,63 +1,37 @@
-// src/components/BottomNav.jsx
-import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import "./BottomNav.css";
+
+const ALLOWED_PATHS = ["/home", "/profile", "/challenges", "/chat"];
+
+const NAV_ITEMS = [
+  { path: "/home", label: "Home", icon: "🏠" },
+  { path: "/profile", label: "Journey", icon: "🐦" },
+  { path: "/challenges", label: "Challenges", icon: "🎯" },
+  { path: "/chat", label: "Talk to me", icon: "💬" },
+];
 
 export default function BottomNav() {
   const location = useLocation();
 
-  // מציגים את הניווט רק בעמודים הרלוונטיים
-  const allowedPages = ["/home", "/profile", "/minimalprofile", "/challenges", "/chat"];
-  if (!allowedPages.includes(location.pathname)) {
+  if (!ALLOWED_PATHS.includes(location.pathname)) {
     return null;
   }
 
   return (
-    // open קבוע – אין מצב סגור ואין כפתור חץ
     <div className="bottom fixed open">
-      <div className="nav">
-        {/* Home */}
-        <NavLink
-          to="/home"
-          className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
-        >
-          <div className="nav-icon">🏠</div>
-          <span className="nav-label">Home</span>
-          <div className="nav-underline" />
-        </NavLink>
-
-        {/* Journey (MinimalProfile) 
-            אם הראוט שלך הוא /profile שמוביל ל-MinimalProfilePage (כמו שהראית),
-            השאירי /profile. אם שינית לנתיב /minimalprofile — החליפי את ה-to למטה. */}
-        <NavLink
-          to="/profile" // אם שינית את הראוט ל־/minimalprofile, החליפי כאן ל־"/minimalprofile"
-          className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
-        >
-          <div className="nav-icon">🐦</div>
-          <span className="nav-label">Journey</span>
-          <div className="nav-underline" />
-        </NavLink>
-
-        {/* Challenges */}
-        <NavLink
-          to="/challenges"
-          className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
-        >
-          <div className="nav-icon">🎯</div>
-          <span className="nav-label">Challenges</span>
-          <div className="nav-underline" />
-        </NavLink>
-
-        {/* Talk to me */}
-        <NavLink
-          to="/chat"
-          className={({ isActive }) => "nav-btn" + (isActive ? " active" : "")}
-        >
-          <div className="nav-icon">💬</div>
-          <span className="nav-label">Talk to me</span>
-          <div className="nav-underline" />
-        </NavLink>
-      </div>
+      <nav className="nav" aria-label="Bottom navigation">
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-btn${isActive ? " active" : ""}`}
+          >
+            <div className="nav-icon" aria-hidden="true">{item.icon}</div>
+            <span className="nav-label">{item.label}</span>
+            <div className="nav-underline" />
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }

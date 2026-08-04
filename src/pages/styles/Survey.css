@@ -393,7 +393,7 @@ body{
   }
   
   .secondary-grid{ grid-template-columns:1fr; }
-  .likert-options{ gap: 28px; } /* עדיין מרווח יותר גם במובייל */
+  .likert-options{ gap: 28px; } /* still more spacing on mobile */
 }
 
 .loading-screen {
@@ -406,11 +406,11 @@ body{
   color: #333;
   font-family: sans-serif;
 }
-/* Overlay טעינה עדין – לא משנה את המבנה הקיים */
+/* subtle loading overlay — preserves existing layout */
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 218, 185, 0.92); /* peach (כתום אפרסק שקוף) */
+  background: rgba(255, 218, 185, 0.92); /* peach (semi-transparent orange) */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -454,7 +454,7 @@ body{
 .topic-box {
   position: relative;
   background: #ffffff;
-  border: 1px solid #000000; /* קו דק שחור */
+  border: 1px solid #000000; /* thin black border */
   border-radius: 12px;
   padding: 1rem;
   text-align: center;
@@ -472,7 +472,7 @@ body{
 }
 
 .topic-box.selected {
-  background: var(--peach-500); /* כתום אפרסק */
+  background: var(--peach-500); /* peach orange */
   border-color: #000000;
   color: white;
 }

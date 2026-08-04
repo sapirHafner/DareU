@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -54,7 +55,7 @@ const questions = [
   },
 ];
 
-export default function Survey() {
+export default function Topics() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState([]);
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ export default function Survey() {
       setStep(step + 1);
     } else {
       localStorage.setItem("surveyAnswers", JSON.stringify(updated));
-      navigate("/topics");
+      navigate("/home");
     }
   };
 

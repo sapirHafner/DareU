@@ -13,7 +13,7 @@
   overflow: hidden;
 }
 
-/* אפקט רקע דקורטיבי */
+/* decorative background effect */
 .login-page::before {
   content: '';
   position: absolute;
@@ -50,7 +50,7 @@
   font-weight: 400;
 }
 
-/* כפתור Google מעוצב */
+/* styled Google button */
 .google-login {
   margin-bottom: 25px;
   position: relative;
@@ -90,7 +90,7 @@
   height: 20px;
 }
 
-/* מפריד OR */
+/* OR separator */
 .or-separator {
   margin: 30px 0;
   font-size: 0.9rem;
@@ -110,7 +110,7 @@
   background: linear-gradient(90deg, transparent, #ddd, transparent);
 }
 
-/* טופס ידני */
+/* manual form */
 .manual-form {
   position: relative;
   z-index: 1;
@@ -145,7 +145,7 @@
   font-size: 0.95rem;
 }
 
-/* אייקונים בשדות קלט */
+/* icons in input fields */
 .input-group i {
   position: absolute;
   left: 16px;
@@ -161,7 +161,7 @@
   color: #ff5f6d;
 }
 
-/* Checkbox מעוצב */
+/* styled checkbox */
 .checkbox-container {
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@
   text-decoration: underline;
 }
 
-/* כפתור שליחה מעוצב */
+/* styled submit button */
 .submit-btn {
   width: 100%;
   padding: 15px;
@@ -244,7 +244,7 @@
   transform: translateY(0);
 }
 
-/* לינק להרשמה */
+/* sign-up link */
 .signup-link {
   margin-top: 25px;
   font-size: 0.95rem;
@@ -265,7 +265,7 @@
   text-decoration: underline;
 }
 
-/* אנימציות כניסה */
+/* entrance animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;

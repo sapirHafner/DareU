@@ -1,62 +1,64 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./goals.css";
 
+const DEFAULT_TOPICS = [
+  "Building Self-Confidence",
+  "Learning & Growth",
+  "Personal Goals",
+];
+
+const GOAL_TARGET = 10;
+const PROGRESS_STORAGE_KEY = "dareu_progress";
+
+function normalizeTopicKey(topic) {
+  return topic.toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function getStoredProgress() {
+  try {
+    return JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
 export default function Goals() {
-  const [progress, setProgress] = useState({});
-  const [selectedTopics, setSelectedTopics] = useState([]);
+  const [progress, setProgress] = useState(() => getStoredProgress());
+  const [selectedTopics, setSelectedTopics] = useState(DEFAULT_TOPICS);
 
   useEffect(() => {
-    // קריאת הנושאים שהמשתמש בחר בשאלון
-    if (window.surveyAnswers && window.surveyAnswers.selectedTopics) {
-      setSelectedTopics(window.surveyAnswers.selectedTopics);
-    } else {
-      // אם אין נתוני שאלון, השתמש בנושאים דיפולטיביים
-      setSelectedTopics(["Building Self-Confidence", "Learning & Growth", "Personal Goals"]);
+    const savedTopics = window.surveyAnswers?.selectedTopics;
+    if (Array.isArray(savedTopics) && savedTopics.length > 0) {
+      setSelectedTopics(savedTopics);
     }
   }, []);
 
-  const loadProgress = () => {
-    try {
-      const data = JSON.parse(localStorage.getItem("dareu_progress") || "{}");
-      setProgress(data);
-    } catch {
-      setProgress({});
-    }
-  };
-
   useEffect(() => {
-    loadProgress();
-    const handler = () => loadProgress();
-    window.addEventListener("dareu:progress-update", handler);
-    return () => window.removeEventListener("dareu:progress-update", handler);
+    const updateProgress = () => setProgress(getStoredProgress());
+    updateProgress();
+
+    window.addEventListener("dareu:progress-update", updateProgress);
+    return () => window.removeEventListener("dareu:progress-update", updateProgress);
   }, []);
-
-  // פונקציה להמרת שם הנושא לקטגוריה (אותה המרה כמו ב-Challenges)
-  const topicToCategory = (topic) => {
-    return topic.toLowerCase().replace(/[^a-z]/g, '');
-  };
-
-  const GOAL_TARGET = 10; // 10 אתגרים לכל נושא
 
   return (
-    <div className="goals">
+    <section className="goals">
       <h2 className="goals__title">Goals</h2>
 
       {selectedTopics.map((topic) => {
-        const categoryKey = topicToCategory(topic);
+        const categoryKey = normalizeTopicKey(topic);
         const currentProgress = Number(progress[categoryKey] || 0);
-        
+        const filledCount = Math.min(currentProgress, GOAL_TARGET);
+
         return (
           <div key={topic} className="goal-row">
             <div className="goal-row__label">{topic}</div>
-            <Circles count={GOAL_TARGET} filled={currentProgress} />
-            <div className="goal-row__counter">
-              {Math.min(currentProgress, GOAL_TARGET)}/{GOAL_TARGET}
-            </div>
+            <Circles count={GOAL_TARGET} filled={filledCount} />
+            <div className="goal-row__counter">{filledCount}/{GOAL_TARGET}</div>
           </div>
         );
       })}
-    </div>
+    </section>
   );
 }
 

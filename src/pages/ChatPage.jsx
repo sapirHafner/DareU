@@ -1,8 +1,8 @@
-// src/ChatPage.jsx
-import React, { useState, useRef, useEffect } from "react";
+import React from 'react';
+import { useEffect, useRef, useState } from "react";
 import backgroundImage from "../assets/chat-bot-background.png";
 
-// ✅ Vite env (חייב להתחיל ב־VITE_)
+// Vite environment variable for Hugging Face token
 const HF_TOKEN = import.meta.env.VITE_HF_TOKEN || "";
 const MODEL_NAME = "unsloth/Meta-Llama-3.1-8B-Instruct:featherless-ai";
 

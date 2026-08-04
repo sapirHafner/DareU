@@ -50,13 +50,13 @@
   margin-top: 4px;
 }
 
-/* מצב פעיל */
+/* Active state */
 .nav-btn.active {
-  color: #000; /* טקסט שחור */
+  color: #000;
 }
 
 .nav-btn.active svg {
-  stroke: #000; /* אייקון שחור מלא */
+  stroke: #000;
 }
 
 .nav-btn.active .nav-icon {
@@ -79,7 +79,7 @@
   left: 0; right: 0; bottom: 0;
   background: #fff;
   border-top: 1px solid #eee;
-  z-index: 1000; /* חשוב: מעל התוכן כדי שהקליקים יעבדו */
+  z-index: 1000; /* keep above content for interaction */
 }
 
 .nav {
@@ -90,7 +90,7 @@
 }
 
 .nav-btn {
-  text-decoration: none;   /* בלי קו תחתי */
+  text-decoration: none;   /* no underline */
   color: inherit;
   display: flex;
   flex-direction: column;
@@ -106,7 +106,7 @@
   background: #000; margin-top: 3px;
 }
 
-/* כדי שהתוכן לא יסתתר מאחורי הסרגל */
+/* prevent content from being hidden behind the bar */
 .page, .ch-page, .profile-page {
   padding-bottom: 88px;
 }

@@ -1,6 +1,6 @@
-// src/pages/Challenges.jsx
-import React, { useState, useEffect } from "react";
-import "./challenges.css";
+import React from 'react';
+import { useEffect, useState } from "react";
+import "./styles/challenges.css";
 
 const META_KEY = "dareu_meta";
 const PROG_KEY = "dareu_progress";
@@ -38,9 +38,9 @@ export default function Challenges() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userProfile, setUserProfile] = useState(null);       // { topics, primaryMotivation, currentLevel }
-  const [allDoneToday, setAllDoneToday] = useState(false);    // ← הודעת "סיימת הכל להיום"
+  const [allDoneToday, setAllDoneToday] = useState(false);    // indicator for when all challenges are completed
 
-  // טען פרופיל לתצוגה (כולל הנושאים)
+  // Load the profile for display, including selected topics
   useEffect(() => {
     (async () => {
       try {
@@ -55,7 +55,7 @@ export default function Challenges() {
 
   useEffect(() => { loadChallengesFromAgent(); }, []);
 
-  // עוזר: קבע רשימת נושאים להציג תמיד (בדיוק 3)
+  // Ensure exactly 3 topics are displayed
   function resolveTopics(dataProposalsTopics = []) {
     const surveyTopics = window.surveyAnswers?.selectedTopics || [];
     const profileTopics = userProfile?.topics || [];
@@ -64,9 +64,9 @@ export default function Challenges() {
     let topics = planTopics.length ? planTopics
                  : profileTopics.length ? profileTopics
                  : surveyTopics.length ? surveyTopics
-                 : ["Fitness & Sports", "Learning & Growth", "Communication Skills"]; // ברירת מחדל נעימה
+                 : ["Fitness & Sports", "Learning & Growth", "Communication Skills"]; // friendly default topics
     
-    // וודא שיש בדיוק 3 נושאים
+    // Ensure there are exactly 3 topics
     if (topics.length > 3) {
       topics = topics.slice(0, 3);
     } else if (topics.length < 3) {
@@ -94,7 +94,7 @@ export default function Challenges() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: USER_ID,
-          // מה שמעניין את ה־planner:
+          // Planner input payload:
           survey: { topics: surveyData?.selectedTopics || [] },
           profile: {
             topics: surveyData?.selectedTopics || [],
@@ -108,16 +108,16 @@ export default function Challenges() {
       if (!response.ok) throw new Error(`Agent request failed: ${response.status}`);
       const data = await response.json();
 
-      // נבנה אובייקט לפי נושאים כך שתמיד יוצגו כל הנושאים של המשתמש
+      // Build a grouped object so all user topics are always shown
       const proposals = Array.isArray(data.proposals) ? data.proposals : [];
       const topicsToShow = resolveTopics(proposals.map(p => p.topic));
 
       const grouped = {};
-      topicsToShow.forEach(t => grouped[t] = []); // ← גם אם ריק, נשמר להצגה
+      topicsToShow.forEach(t => grouped[t] = []); // keep all topics even if there are no challenges yet
 
       proposals.forEach(p => {
         const topic = p.topic || topicsToShow[0] || "general";
-        if (grouped[topic]) { // ← וודא שהנושא קיים
+        if (grouped[topic]) { // ensure the topic exists
           grouped[topic].push({
             id: p.runId,
             title: p.suggestedText || "dareU: Try a tiny step",
@@ -132,16 +132,16 @@ export default function Challenges() {
 
 
       setChallenges(grouped);
-      // שמור גם פרופיל שחזר מהתכנון (אם חזר)
+      // Keep planner profile if returned
       if (data.profile) {
         setUserProfile(prev => ({ ...(prev || {}), ...data.profile }));
       }
       setError(null);
-      setAllDoneToday(false); // ← תמיד יהיו משימות
+      setAllDoneToday(false); // ensure "Well done" is not shown
     } catch (err) {
       console.error("Error loading challenges from agent:", err);
       setError(err.message);
-      // fallback לאתגרים סטטיים
+      // fallback to static challenges
       loadFallbackChallenges();
     } finally {
       setLoading(false);
@@ -180,7 +180,7 @@ export default function Challenges() {
     });
     
     setChallenges(fallbackChallenges);
-    setAllDoneToday(false); // ← וודא שלא נציג "Well done"
+    setAllDoneToday(false); // ensure "Well done" is not shown
   };
 
   const recordChallengeDecision = async (challengeId, contentHash, status, points) => {
@@ -192,7 +192,7 @@ export default function Challenges() {
           body: JSON.stringify({ runId: challengeId, evidence: { socialExposure: true } })
         });
         const data = await resp.json();
-        return data; // ← מחזירים ל-Row
+        return data;
       } else if (status === "later") {
         await fetch(`${API_BASE}/agent/decision`, {
           method: "POST",
@@ -207,13 +207,13 @@ export default function Challenges() {
     }
   };
 
-  // פונקציה ליצירת אתגר חדש מה-AI - עם וידוא שהוא שונה מהקיים
+  // Generate a new AI challenge and ensure it is different from existing ones
   const generateNewChallenge = async (topic, existingChallenges = []) => {
     try {
       const surveyData = window.surveyAnswers;
       const userLevel = readMeta().level;
       
-      // נסה כמה פעמים לקבל אתגר שונה
+      // Try several times to get a different challenge
       for (let attempt = 0; attempt < 3; attempt++) {
         const response = await fetch(`${API_BASE}/agent/plan`, {
           method: 'POST',
@@ -238,7 +238,7 @@ export default function Challenges() {
 
         const data = await response.json();
         
-        // מצא אתגר שלא קיים כבר
+        // Find a proposal that doesn't already exist
         const newProposal = (data.proposals || []).find(p => 
           !existingChallenges.some(existing => 
             existing.title === (p.suggestedText || "dareU: Try a tiny step") || 
@@ -259,7 +259,7 @@ export default function Challenges() {
         }
       }
       
-      return null; // אחרי 3 נסיונות, ויתור
+      return null; // after 3 attempts, give up
       
     } catch (err) {
       console.error('Error generating new challenge:', err);
@@ -390,7 +390,7 @@ export default function Challenges() {
             />
           ))}
 
-          {/* Action row: לא מציגים אם סיימת הכל */}
+          {/* Action row: hidden if all done */}
           <div style={{ textAlign: "center", marginTop: "2rem" }}>
             <button
               onClick={loadChallengesFromAgent}
@@ -476,7 +476,7 @@ function ChallengeRow({ challenge, onRemove, onComplete, onGenerateNew, isGenera
       setStatus("success");
     } else if (status === "success") {
       try {
-        // יעדכן מטרות/ספירות מקומיות
+        // update local goals/progress counters
         const data = JSON.parse(localStorage.getItem(PROG_KEY) || "{}");
         const category = challenge.topic?.toLowerCase().replace(/[^a-z]/g, "") || "general";
         const curr = Number(data[category] || 0);
@@ -484,10 +484,10 @@ function ChallengeRow({ challenge, onRemove, onComplete, onGenerateNew, isGenera
         localStorage.setItem(PROG_KEY, JSON.stringify(data));
         window.dispatchEvent(new Event("dareu:progress-update"));
 
-        // שליחת השלמה לשרת
+        // send completion to the server
         const res = await onComplete(challenge.id, challenge.contentHash, "success", challenge.points || 10);
 
-        // נקודות לפי השרת (או fallback)
+        // assign points from the server response or fallback value
         const gained = (res && typeof res.points === "number") ? res.points : (challenge.points || 10);
         const meta = readMeta();
         writeMeta(meta.points + gained);
@@ -510,7 +510,7 @@ function ChallengeRow({ challenge, onRemove, onComplete, onGenerateNew, isGenera
     );
     
     onRemove(challenge.id);
-    // יצירת אתגר חדש גם אחרי "Later" - העבר את הנושא ואת האתגר הנוכחי
+    // Generate a replacement challenge after "Later" - pass the current topic and challenge
     setTimeout(() => onGenerateNew(challenge.topic, [challenge]), 500);
   };
 

@@ -1,8 +1,8 @@
-// src/pages/Login.jsx
-import React, { useState } from "react";
+import React from 'react';
 import { GoogleLogin } from "@react-oauth/google";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
+import "./styles/Login.css";
 
 export default function Login() {
   const navigate = useNavigate();

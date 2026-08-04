@@ -1,8 +1,9 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Survey.css";
+import "./styles/Survey.css";
 
-// ✅ הגדרת BASE API להעביר בין סביבות
+// Base API path configurable by Vite env
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5050";
 
 function getUserId() {
@@ -158,7 +159,7 @@ export default function Survey() {
   const navigate = useNavigate();
   const [pageIdx, setPageIdx] = useState(0);
   const [answers, setAnswers] = useState({});
-  // ✅ שם עקבי: מערך של נושאים
+  // Consistent name: selectedTopics is an array
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [hasFinished, setHasFinished] = useState(false);
@@ -167,7 +168,7 @@ export default function Survey() {
   const current = PAGES[pageIdx];
 
   const totalQuestions = useMemo(() => {
-    let count = 1; // בחירת נושאים נחשבת כאייטם אחד
+    let count = 1; // topic selection counts as one item
     for (let i = 1; i < PAGES.length; i++) {
       if (PAGES[i].questions) count += PAGES[i].questions.length;
     }
@@ -251,34 +252,34 @@ export default function Survey() {
     setSubmitting(true);
     try {
       const surveyData = {
-        selectedTopics,                 // ✅ שמרנו את המערך
+        selectedTopics,                 // keep the selected topic array
         answers,
         scores,
         normalized,
         primaryMotivation: sortedCats[0],
       };
 
-      // שמירה ב-window לצרכים מקומיים
+      // store survey data on window for local access
       window.surveyAnswers = surveyData;
       
-      // יצירת שאלות מדמות
+      // generate mock questions
       const payload = await generateQuestionsMock({
         answers: surveyData,
-        topics: selectedTopics,        // ✅ לא לעטוף בעוד מערך
+        topics: selectedTopics,        // do not wrap in another array
         count: 8,
       });
 
       window.generatedQuestions = payload;
 
-      // ✅ קריאה לשרת לשמירת הפרופיל
+      // persist profile to backend
       await fetch(`${API_BASE}/profile/upsert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: USER_ID,
-          topics: selectedTopics,                      // שמות אחידים בשירות
+          topics: selectedTopics,                      // consistent profile topics
           motivation: surveyData.primaryMotivation,    // primaryMotivation -> motivation
-          level: "beginner",                           // או להחליט לפי normalized/scores
+          level: "beginner",                           // or decide based on normalized scores
           answers,
           scores,
           normalized,
@@ -373,7 +374,7 @@ export default function Survey() {
           maxScores={maxScores}
           normalized={normalized}
           sortedCats={sortedCats}
-          selectedTopics={selectedTopics}   // ✅ מעבירים מערך
+          selectedTopics={selectedTopics}   // pass the topic array
           showContinueButton={showContinueButton}
           onContinue={handleContinue}
           submitting={submitting}

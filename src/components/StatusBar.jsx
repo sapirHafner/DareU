@@ -1,23 +1,19 @@
-import React from 'react';
-
-const StatusBar = () => {
+export default function StatusBar() {
   return (
-    <div className="status">
-      <span>9:41</span>
+    <div className="status" aria-label="Status bar">
+      <span className="status-time">9:41</span>
       <div className="status-right">
-        <div className="dots">
-          <div className="dot on" />
-          <div className="dot on" />
-          <div className="dot on" />
-          <div className="dot off" />
+        <div className="dots" aria-hidden="true">
+          <span className="dot on" />
+          <span className="dot on" />
+          <span className="dot on" />
+          <span className="dot off" />
         </div>
-        <div className="battery">
-          <div className="battery-fill" />
+        <div className="battery" aria-hidden="true">
+          <span className="battery-fill" />
         </div>
-        <div className="signal" />
+        <span className="signal" aria-hidden="true" />
       </div>
     </div>
   );
-};
-
-export default StatusBar;
+}

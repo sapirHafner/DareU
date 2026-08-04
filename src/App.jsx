@@ -1,27 +1,26 @@
-// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 
 import BottomNav from "./components/BottomNav.jsx";
 
+import Challenges from "./pages/Challenges.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import Login from "./pages/Login.jsx";
 import MinimalProfilePage from "./pages/MinimalProfilePage.jsx";
 import Survey from "./pages/Survey.jsx";
 import Topics from "./pages/Topics.jsx";
-import Challenges from "./pages/Challenges.jsx";
-import ChatPage from "./pages/ChatPage.jsx";
 import WelcomePage from "./pages/WelcomePage.jsx";
-import Login from "./pages/Login.jsx";
 
 function ProgressStub() {
   return <div style={{ padding: 24 }}>Progress page</div>;
 }
 
-// עטיפה שמחליטה מתי להציג את ה-Nav
+// Wrapper that decides when the navigation bar should be shown
 function Layout({ children }) {
   const location = useLocation();
-  // הסתרה במסכים הראשוניים (לנדינג/לוגין/סקר)
+  // Hide navigation on landing, login, and survey screens
   const hideNavOn = ["/", "/login", "/survey"];
 
   return (
@@ -37,11 +36,11 @@ export default function App() {
     <Router>
       <Layout>
         <Routes>
-          {/* דף פתיחה והתחברות */}
+          {/* Landing and login routes */}
           <Route path="/" element={<WelcomePage />} />
           <Route path="/login" element={<Login />} />
 
-          {/* שאר הדפים */}
+          {/* Other app pages */}
           <Route path="/home" element={<HomePage />} />
           <Route path="/profile" element={<MinimalProfilePage />} />
           <Route path="/survey" element={<Survey />} />
@@ -50,7 +49,7 @@ export default function App() {
           <Route path="/progress" element={<ProgressStub />} />
           <Route path="/chat" element={<ChatPage />} />
 
-          {/* נתיב לא קיים → חזרה לדף הפתיחה */}
+          {/* Unknown route → redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

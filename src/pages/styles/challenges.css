@@ -1,5 +1,5 @@
 /* Page */
-.ch-page { padding: 24px 16px 88px; } /* מרווח תחתון לסרגל */
+.ch-page { padding: 24px 16px 88px; } /* bottom padding for navigation bar */
 .ch-title { font-size: 28px; font-weight: 800; color: #ff9b85; margin: 8px 0 24px; }
 
 /* Sections */
@@ -16,7 +16,7 @@
   border-radius: 16px;
   padding: 12px 16px;
   display: flex;
-  justify-content: space-between; /* טקסט משמאל, כפתורים מימין */
+  justify-content: space-between; /* text left, buttons right */
   align-items: center;
 }
 .ch-card__title { font-weight: 600; font-size: 15px; }
@@ -28,9 +28,9 @@
   font-weight: 700; cursor: pointer; min-width: 90px; text-align: center; color: #fff;
 }
 
-/* צבעים */
-.ch-btn--main.ch-idle, .ch-btn--main.ch-later { background: #ff9b40; } /* Start – כתום */
-.ch-btn--main.ch-success { background: #2ecc71; }                     /* Success – ירוק */
-.ch-btn--later { background: #e74c3c; }                                /* Later – אדום */
+/* Colors */
+.ch-btn--main.ch-idle, .ch-btn--main.ch-later { background: #ff9b40; } /* Start – orange */
+.ch-btn--main.ch-success { background: #2ecc71; }                     /* Success – green */
+.ch-btn--later { background: #e74c3c; }                                /* Later – red */
 
 .ch-check { font-weight: 900; margin-right: 6px; }

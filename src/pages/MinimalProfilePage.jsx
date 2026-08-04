@@ -1,8 +1,8 @@
-// src/pages/MinimalProfilePage.jsx
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Goals from '../components/Goals';
-import './profile.css';
+import './styles/profile.css';
 
 const META_KEY = "dareu_meta";
 
@@ -22,7 +22,7 @@ const MinimalProfilePage = () => {
   const navigate = useNavigate();
   const [{ points, level }, setMeta] = useState(() => readMeta());
 
-  // בדיקה אם השאלון הושלם
+  // Check whether the survey has been completed
   useEffect(() => {
     if (!window.surveyAnswers) {
       navigate('/survey');
@@ -31,10 +31,10 @@ const MinimalProfilePage = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // טען נקודות/Level בעת כניסה
+    // Load points and level on entry
     setMeta(readMeta());
 
-    // האזנה לעדכון חי שמגיע מעמוד Challenges (אחרי Success)
+    // Listen for live updates from the Challenges page
     const handler = () => setMeta(readMeta());
     window.addEventListener("dareu:progress-update", handler);
     return () => window.removeEventListener("dareu:progress-update", handler);
@@ -50,14 +50,14 @@ const MinimalProfilePage = () => {
 
   const currentAnimal = getAnimalStage(level);
 
-  // אם אין נתוני סקר, אל תרנדר כלום (הניווט כבר יקרה)
+  // If survey data is missing, don't render yet (navigation will occur)
   if (!window.surveyAnswers) {
     return null;
   }
 
   return (
     <div className="page profile-page">
-      {/* Header - רק Your Journey */}
+      {/* Header - only Your Journey */}
       <div className="container pt-8 pb-6">
         <h1 className="title">Your Journey</h1>
       </div>
