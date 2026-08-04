@@ -1,5 +1,5 @@
-import { Router } from 'express';
 import { randomUUID as uuid } from 'crypto';
+import { Router } from 'express';
 
 const rooms = new Map();
 const router = Router();
@@ -22,4 +22,4 @@ router.post('/finish', (req, res) => {
   res.json({ first, bonus: first ? 10 : 0 });
 });
 
-export default router;   // 👈 זה החלק שהיה חסר
+export default router;   
