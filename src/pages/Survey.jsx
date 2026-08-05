@@ -154,6 +154,13 @@ const Choice4 = ({ options, value, onChange }) => (
   </div>
 );
 
+
+
+
+
+
+
+
 // ---------- Main ----------
 export default function Survey() {
   const navigate = useNavigate();

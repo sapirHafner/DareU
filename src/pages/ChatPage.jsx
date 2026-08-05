@@ -1,4 +1,3 @@
-import React from 'react';
 import { useEffect, useRef, useState } from "react";
 import backgroundImage from "../assets/chat-bot-background.png";
 
@@ -25,6 +24,10 @@ const TypingIndicator = () => (
     </div>
   </div>
 );
+
+
+
+
 
 export default function ChatPage() {
   // State Initialization
@@ -63,6 +66,8 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, botReply]);
   }
 
+  
+  
   // --- API Communication Logic ---
   async function fetchHuggingFaceReply(conversationHistory) {
     const apiMessages = conversationHistory.map((msg) => ({
@@ -87,6 +92,7 @@ export default function ChatPage() {
         }
       );
 
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         return `API Error ${response.status}: ${
@@ -94,6 +100,7 @@ export default function ChatPage() {
         }`;
       }
 
+      
       const data = await response.json();
 
       if (data?.choices?.[0]?.message?.content) {
@@ -105,6 +112,9 @@ export default function ChatPage() {
       return `Fetch error: ${err.message}`;
     }
   }
+
+
+
 
   // --- JSX Design with Background Image ---
   return (
@@ -130,7 +140,8 @@ export default function ChatPage() {
           padding: 24,
           display: "flex",
           flexDirection: "column",
-          minHeight: 500,
+          height: "80vh",
+          maxHeight: 700,
         }}
       >
         <h1
@@ -205,6 +216,8 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
+        
+        
         {/* Input Area */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <input
@@ -223,6 +236,7 @@ export default function ChatPage() {
             placeholder="Type a message..."
             disabled={!HF_TOKEN || isTyping}
           />
+          
           <button
             onClick={handleSend}
             style={{
